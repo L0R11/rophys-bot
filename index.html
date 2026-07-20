@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rophys — Pairing WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg: #0b0a0e;
+    --bg-2: #131017;
+    --card: #17131c;
+    --line: #2a2230;
+    --crimson: #b3123f;
+    --crimson-bright: #e0245e;
+    --gold: #caa24a;
+    --ink: #f2ece7;
+    --muted: #948b98;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(60% 50% at 50% 0%, rgba(179,18,63,0.16), transparent 60%),
+      radial-gradient(80% 60% at 90% 100%, rgba(202,162,74,0.06), transparent 60%),
+      var(--bg);
+    color: var(--ink);
+    font-family: 'Manrope', system-ui, sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 32px 16px;
+  }
+
+  .lace{
+    position:fixed; inset:0; pointer-events:none; opacity:.5;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 14px),
+      repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 14px);
+  }
+
+  .wrap{ width:100%; max-width: 420px; position:relative; z-index:1; }
+
+  .eye{
+    width:64px; height:64px; margin: 0 auto 18px;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .eye svg{ width:100%; height:100%; filter: drop-shadow(0 0 14px rgba(224,36,94,.55)); }
+  .eye .pupil{ animation: blink 4.5s ease-in-out infinite; transform-origin: center; }
+  @keyframes blink{
+    0%, 92%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.08); }
+  }
+
+  h1{
+    font-family:'Cinzel Decorative', serif;
+    font-weight:900;
+    text-align:center;
+    font-size: 30px;
+    letter-spacing: .04em;
+    margin: 0 0 4px;
+    background: linear-gradient(180deg, #fff, var(--crimson-bright) 140%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .tagline{
+    text-align:center; color:var(--muted); font-size:13px; letter-spacing:.14em;
+    text-transform:uppercase; margin: 0 0 32px;
+  }
+
+  .card{
+    background: linear-gradient(180deg, var(--card), var(--bg-2));
+    border:1px solid var(--line);
+    border-radius: 18px;
+    padding: 26px 24px;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+
+  .status-row{ display:flex; align-items:center; gap:9px; margin-bottom:20px; }
+  .dot{ width:8px; height:8px; border-radius:50%; background: var(--muted); flex-shrink:0; }
+  .dot.qr, .dot.pairing{ background: var(--gold); box-shadow:0 0 10px var(--gold); animation: pulse 1.4s infinite; }
+  .dot.connecting{ background: var(--gold); animation: pulse 1.4s infinite; }
+  .dot.connected{ background: #35c46a; box-shadow:0 0 10px #35c46a; }
+  .dot.disconnected{ background: var(--crimson); }
+  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.35} }
+  .status-text{ font-size:13px; color: var(--muted); letter-spacing:.02em; }
+
+  label{ display:block; font-size:12px; color:var(--muted); margin-bottom:8px; letter-spacing:.05em; text-transform:uppercase; }
+
+  .input-row{ display:flex; gap:8px; }
+  input[type=text]{
+    flex:1; background: #0f0c13; border:1px solid var(--line); color:var(--ink);
+    border-radius:10px; padding: 12px 14px; font-size:15px; font-family:'JetBrains Mono', monospace;
+    outline:none; transition: border-color .15s;
+  }
+  input[type=text]:focus{ border-color: var(--crimson); }
+  input[type=text]::placeholder{ color:#5c5563; }
+
+  button{
+    background: linear-gradient(180deg, var(--crimson-bright), var(--crimson));
+    color:#fff; border:none; border-radius:10px; padding:12px 18px;
+    font-family:'Manrope', sans-serif; font-weight:700; font-size:14px; letter-spacing:.02em;
+    cursor:pointer; transition: filter .15s, transform .1s;
+    white-space:nowrap;
+  }
+  button:hover{ filter:brightness(1.1); }
+  button:active{ transform: scale(.98); }
+  button:disabled{ opacity:.5; cursor:not-allowed; filter:none; }
+
+  .hint{ font-size:12px; color:var(--muted); margin-top:10px; line-height:1.5; }
+
+  .result{ margin-top:22px; text-align:center; display:none; }
+  .result.show{ display:block; }
+
+  .pairing-code{
+    font-family:'JetBrains Mono', monospace; font-size:34px; font-weight:700;
+    letter-spacing: .12em; color: var(--gold);
+    background:#0f0c13; border:1px dashed var(--line); border-radius:12px;
+    padding: 16px; margin: 14px 0 6px;
+  }
+  .qr-box{ background:#fff; padding:14px; border-radius:14px; display:inline-block; margin: 10px 0; }
+  .qr-box img{ display:block; width:220px; height:220px; }
+
+  .connected-box{
+    display:none; text-align:center; padding: 10px 0 4px;
+  }
+  .connected-box.show{ display:block; }
+  .connected-name{ font-size:17px; font-weight:700; margin: 6px 0 2px; }
+  .connected-sub{ font-size:13px; color:var(--muted); }
+  .heart{ font-size:34px; margin-bottom:6px; }
+
+  .footer-note{
+    text-align:center; color:var(--muted); font-size:11.5px; margin-top:22px; letter-spacing:.03em;
+  }
+</style>
+</head>
+<body>
+<div class="lace"></div>
+<div class="wrap">
+
+  <div class="eye">
+    <svg viewBox="0 0 100 100" fill="none">
+      <circle cx="50" cy="50" r="46" stroke="#e0245e" stroke-width="2" opacity="0.35"/>
+      <g class="pupil">
+        <polygon points="50,18 61,42 87,42 66,58 74,84 50,68 26,84 34,58 13,42 39,42"
+          fill="none" stroke="#e0245e" stroke-width="3" stroke-linejoin="round"/>
+        <circle cx="50" cy="50" r="6" fill="#e0245e"/>
+      </g>
+    </svg>
+  </div>
+
+  <h1>ROPHYS</h1>
+  <p class="tagline">Sang Beruang Hitam · WhatsApp AI</p>
+
+  <div class="card">
+    <div class="status-row">
+      <span class="dot disconnected" id="statusDot"></span>
+      <span class="status-text" id="statusText">Belum terhubung</span>
+    </div>
+
+    <div id="pairForm">
+      <label for="phone">Nomor WhatsApp Sender</label>
+      <div class="input-row">
+        <input type="text" id="phone" placeholder="6281234567890" inputmode="numeric" />
+        <button id="pairBtn">Pairing</button>
+      </div>
+      <p class="hint">Pakai kode negara tanpa tanda "+", contoh <b>6281234567890</b>. Setelah dapat kode, masukkan di WhatsApp: <b>Perangkat Tertaut → Tautkan dengan nomor telepon</b>.</p>
+    </div>
+
+    <div class="result" id="result">
+      <div id="qrWrap" style="display:none">
+        <div class="qr-box"><img id="qrImg" alt="QR pairing" /></div>
+        <p class="hint">Scan pakai WhatsApp → Perangkat Tertaut → Tautkan Perangkat.</p>
+      </div>
+      <div id="codeWrap" style="display:none">
+        <div class="pairing-code" id="pairingCode">------</div>
+        <p class="hint">Masukkan kode ini di WhatsApp kamu dalam 60 detik.</p>
+      </div>
+    </div>
+
+    <div class="connected-box" id="connectedBox">
+      <div class="heart">🖤</div>
+      <div class="connected-name" id="connectedName">Terhubung!</div>
+      <div class="connected-sub">Rophys sekarang aktif dan siap balas chat kamu.</div>
+    </div>
+  </div>
+
+  <p class="footer-note">Sesi tersimpan otomatis — bot tetap jalan selama server ini aktif.</p>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const statusDot = $('statusDot');
+  const statusText = $('statusText');
+  const pairForm = $('pairForm');
+  const result = $('result');
+  const qrWrap = $('qrWrap');
+  const codeWrap = $('codeWrap');
+  const connectedBox = $('connectedBox');
+  const pairBtn = $('pairBtn');
+
+  const STATUS_LABEL = {
+    disconnected: 'Belum terhubung',
+    connecting: 'Menghubungkan...',
+    qr: 'Scan QR di bawah ini',
+    pairing: 'Masukkan kode pairing',
+    connected: 'Terhubung',
+  };
+
+  async function pair() {
+    const phone = $('phone').value.trim();
+    if (!phone) return;
+    pairBtn.disabled = true;
+    pairBtn.textContent = 'Menghubungkan...';
+    try {
+      const res = await fetch('/api/pair', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      if (!res.ok) alert(data.error || 'Gagal memulai pairing');
+    } catch (e) {
+      alert('Gagal menghubungi server');
+    }
+    pairBtn.disabled = false;
+    pairBtn.textContent = 'Pairing';
+  }
+
+  pairBtn.addEventListener('click', pair);
+  $('phone').addEventListener('keydown', (e) => { if (e.key === 'Enter') pair(); });
+
+  async function poll() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+
+      statusDot.className = 'dot ' + data.status;
+      statusText.textContent = STATUS_LABEL[data.status] || data.status;
+
+      if (data.status === 'connected') {
+        pairForm.style.display = 'none';
+        result.classList.remove('show');
+        connectedBox.classList.add('show');
+        $('connectedName').textContent = 'Terhubung sebagai ' + (data.user?.name || data.user?.id || 'sender');
+      } else {
+        connectedBox.classList.remove('show');
+        pairForm.style.display = 'block';
+
+        if (data.status === 'qr' && data.qr) {
+          result.classList.add('show');
+          qrWrap.style.display = 'block';
+          codeWrap.style.display = 'none';
+          $('qrImg').src = data.qr;
+        } else if (data.status === 'pairing' && data.pairingCode) {
+          result.classList.add('show');
+          qrWrap.style.display = 'none';
+          codeWrap.style.display = 'block';
+          $('pairingCode').textContent = data.pairingCode;
+        } else {
+          result.classList.remove('show');
+        }
+      }
+    } catch (e) {
+      // server mungkin lagi restart, diamkan dan coba lagi
+    }
+  }
+
+  poll();
+  setInterval(poll, 2000);
+</script>
+</body>
+</html>

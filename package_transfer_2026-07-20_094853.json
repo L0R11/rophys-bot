@@ -1,0 +1,24 @@
+{
+  "name": "rophys-wa-bot",
+  "version": "1.0.0",
+  "description": "Bot AI WhatsApp dengan persona Rophys — pairing via halaman HTML, chat AI, stiker, dan moderasi grup.",
+  "main": "server.js",
+  "type": "commonjs",
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "baileys": "^7.0.0-rc12",
+    "@hapi/boom": "^10.0.1",
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5",
+    "pino": "^8.21.0",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.33.5",
+    "node-webpmux": "^3.2.1",
+    "fluent-ffmpeg": "^2.1.3",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "openai": "^4.68.0"
+  }
+}
